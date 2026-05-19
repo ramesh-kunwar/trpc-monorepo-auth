@@ -1,5 +1,7 @@
 import { createHmac, randomBytes } from "node:crypto";
 
+import { TRPCError } from "@trpc/server";
+
 import { db, eq } from "@repo/database";
 import { usersTable } from "@repo/database/models/user";
 
@@ -20,7 +22,8 @@ class UserService {
       await createUserWithEmailAndPasswordInput.parseAsync(payload);
 
     const existingUserWithEmail = await this.getUserByEmail(email);
-    if (existingUserWithEmail) throw new Error(`User with email ${email} already exists`);
+    if (existingUserWithEmail)
+      throw new TRPCError({ code: "CONFLICT", message: `User with email ${email} already exists` });
 
     const salt = randomBytes(16).toString("hex");
     const hash = createHmac("sha256", salt).update(password).digest("hex");
@@ -33,7 +36,7 @@ class UserService {
       });
 
     if (!userInsertResult || userInsertResult.length === 0 || !userInsertResult[0]?.id)
-      throw new Error(`Something went wrong while creating a user`);
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to create user" });
     return {
       id: userInsertResult[0]?.id,
     };

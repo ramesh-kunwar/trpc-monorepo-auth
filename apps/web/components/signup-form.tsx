@@ -8,8 +8,8 @@ import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "~/components/ui/field";
 import { Input } from "~/components/ui/input";
+import { useSignup } from "~/hooks/api/auth";
 import { cn } from "~/lib/utils";
-import { trpc } from "~/trpc/client";
 
 const signupSchema = z
   .object({
@@ -26,8 +26,7 @@ const signupSchema = z
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 export function SignupForm({ className, ...props }: React.ComponentProps<"form">) {
-  const { mutateAsync: createUserWithEmailAndPasswordAsync } =
-    trpc.auth.createUserWithEmailAndPassword.useMutation();
+  const { createUserWithEmailAndPasswordAsync, error } = useSignup();
   const {
     register,
     handleSubmit,
@@ -37,13 +36,16 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
   });
 
   async function onSubmit(values: SignupFormValues) {
-    console.log("Signup form values:", values);
-    const { id } = await createUserWithEmailAndPasswordAsync({
-      email: values.email,
-      fullName: values.name,
-      password: values.password,
-    });
-    console.log(`User created with id = ${id}`);
+    try {
+      const { id } = await createUserWithEmailAndPasswordAsync({
+        email: values.email,
+        fullName: values.name,
+        password: values.password,
+      });
+      console.log(`User created with id = ${id}`);
+    } catch {
+      // error state is tracked by react-query via `error` above
+    }
   }
 
   return (
@@ -55,6 +57,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
       <div className="flex flex-col gap-1 text-center">
         <h1 className="text-2xl font-semibold tracking-tight">Create an account</h1>
       </div>
+      {error && <p className="text-sm text-destructive text-center">{error.message}</p>}
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor="name">Full Name</FieldLabel>
