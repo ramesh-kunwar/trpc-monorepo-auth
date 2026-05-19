@@ -1,12 +1,11 @@
-import express from "express";
-import { logger } from "@repo/logger";
-import cors from "cors";
-
-import * as trpcExpress from "@trpc/server/adapters/express";
-import { generateOpenApiDocument, createOpenApiExpressMiddleware } from "trpc-to-openapi";
 import { apiReference } from "@scalar/express-api-reference";
+import * as trpcExpress from "@trpc/server/adapters/express";
+import cors from "cors";
+import express from "express";
+import { createOpenApiExpressMiddleware, generateOpenApiDocument } from "trpc-to-openapi";
 
-import { serverRouter, createContext } from "@repo/trpc/server";
+import { logger } from "@repo/logger";
+import { createContext, serverRouter } from "@repo/trpc/server";
 
 import { env } from "./env";
 
@@ -17,13 +16,13 @@ const openApiDocument = generateOpenApiDocument(serverRouter, {
   baseUrl: env.BASE_URL.concat("/api"),
 });
 
-if (env.NODE_ENV !== "prod") {
-  app.use(
-    cors({
-      origin: "*",
-    }),
-  );
-}
+// if (env.NODE_ENV !== "prod") {
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+  }),
+);
+// }
 
 app.use(express.json());
 
