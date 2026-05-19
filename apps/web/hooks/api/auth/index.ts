@@ -4,9 +4,7 @@ export const useSignup = () => {
   const {
     mutateAsync: createUserWithEmailAndPasswordAsync,
     mutate: createUserWithEmailAndPassword,
-    error,
     isError,
-    failureCount,
     isIdle,
     isSuccess,
     status,
@@ -15,9 +13,7 @@ export const useSignup = () => {
   return {
     createUserWithEmailAndPasswordAsync,
     createUserWithEmailAndPassword,
-    error,
     isError,
-    failureCount,
     isIdle,
     isSuccess,
     status,

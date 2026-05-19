@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "~/components/ui/button";
@@ -26,7 +27,7 @@ const signupSchema = z
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 export function SignupForm({ className, ...props }: React.ComponentProps<"form">) {
-  const { createUserWithEmailAndPasswordAsync, error } = useSignup();
+  const { createUserWithEmailAndPasswordAsync } = useSignup();
   const {
     register,
     handleSubmit,
@@ -37,14 +38,17 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
 
   async function onSubmit(values: SignupFormValues) {
     try {
-      const { id } = await createUserWithEmailAndPasswordAsync({
+      await createUserWithEmailAndPasswordAsync({
         email: values.email,
         fullName: values.name,
         password: values.password,
       });
-      console.log(`User created with id = ${id}`);
-    } catch {
-      // error state is tracked by react-query via `error` above
+      toast.success("Account created", {
+        description: "Welcome! You can now sign in.",
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Something went wrong.";
+      toast.error("Signup failed", { description: message });
     }
   }
 
@@ -57,7 +61,6 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
       <div className="flex flex-col gap-1 text-center">
         <h1 className="text-2xl font-semibold tracking-tight">Create an account</h1>
       </div>
-      {error && <p className="text-sm text-destructive text-center">{error.message}</p>}
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor="name">Full Name</FieldLabel>
