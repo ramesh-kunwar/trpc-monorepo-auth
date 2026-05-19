@@ -3,25 +3,17 @@
   "display": "Next.js",
   "extends": "./base.json",
   "compilerOptions": {
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "plugins": [{ "name": "next" }],
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "jsx": "preserve",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": false,
     "declaration": false,
     "declarationMap": false,
     "incremental": true,
-    "lib": ["dom", "dom.iterable", "es2022"],
-    "jsx": "preserve",
-    "module": "esnext",
-    "target": "ES2022",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
     "noEmit": true,
-    "allowJs": true,
-    "checkJs": true,
-    "moduleDetection": "force"
+    "allowJs": true
   },
-  "include": ["src", "next-env.d.ts"],
   "exclude": ["node_modules"]
 }

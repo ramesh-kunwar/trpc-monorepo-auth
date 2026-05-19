@@ -1,9 +1,12 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Node JS",
+  "display": "Node.js",
   "extends": "./base.json",
   "compilerOptions": {
+    "module": "CommonJS",
     "moduleResolution": "Node",
-    "module": "CommonJS"
+    "verbatimModuleSyntax": false,
+    "outDir": "./dist",
+    "sourceMap": true
   }
 }
