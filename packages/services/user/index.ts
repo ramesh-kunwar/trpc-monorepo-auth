@@ -6,6 +6,7 @@ import * as jwt from "jsonwebtoken";
 import { db, eq } from "@repo/database";
 import { usersTable } from "@repo/database/models/user";
 
+import { env } from "../env";
 import {
   type CreateUserWithEmailAndPasswordInputType,
   GenerateUserTokenPayloadType,
@@ -22,6 +23,8 @@ class UserService {
 
   private async generateUserToken(payload: GenerateUserTokenPayloadType) {
     const { id } = await generateUserTokenPayload.parseAsync(payload);
+    const token = jwt.sign({ id }, env.JWT_SECRET);
+    return { token };
   }
 
   public async createUserWithEmailAndPassword(payload: CreateUserWithEmailAndPasswordInputType) {
@@ -44,8 +47,12 @@ class UserService {
 
     if (!userInsertResult || userInsertResult.length === 0 || !userInsertResult[0]?.id)
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to create user" });
+
+    const userId = userInsertResult[0].id;
+    const { token } = await this.generateUserToken({ id: userId });
     return {
       id: userInsertResult[0]?.id,
+      token,
     };
   }
 }
