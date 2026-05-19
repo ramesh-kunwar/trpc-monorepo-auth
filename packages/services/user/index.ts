@@ -1,13 +1,16 @@
 import { createHmac, randomBytes } from "node:crypto";
 
 import { TRPCError } from "@trpc/server";
+import * as jwt from "jsonwebtoken";
 
 import { db, eq } from "@repo/database";
 import { usersTable } from "@repo/database/models/user";
 
 import {
   type CreateUserWithEmailAndPasswordInputType,
+  GenerateUserTokenPayloadType,
   createUserWithEmailAndPasswordInput,
+  generateUserTokenPayload,
 } from "./model";
 
 class UserService {
@@ -15,6 +18,10 @@ class UserService {
     const result = await db.select().from(usersTable).where(eq(usersTable.email, email));
     if (!result || result.length === 0) return null;
     return result;
+  }
+
+  private async generateUserToken(payload: GenerateUserTokenPayloadType) {
+    const { id } = await generateUserTokenPayload.parseAsync(payload);
   }
 
   public async createUserWithEmailAndPassword(payload: CreateUserWithEmailAndPasswordInputType) {
