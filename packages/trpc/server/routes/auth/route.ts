@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 
 import { userService } from "../../services/index";
 import { publicProcedure, router } from "../../trpc";
+import { setAuthenticationCookie } from "../../utils/cookie";
 import { generatePath } from "../../utils/path-generator";
 import {
   createUserWithEmailAndPasswordInputModel,
@@ -22,14 +23,15 @@ export const authRouter = router({
     })
     .input(createUserWithEmailAndPasswordInputModel)
     .output(createUserWithEmailAndPasswordOutputModel)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const { fullName, email, password } = input;
       try {
-        const { id } = await userService.createUserWithEmailAndPassword({
+        const { id, token } = await userService.createUserWithEmailAndPassword({
           fullName,
           email,
           password,
         });
+        setAuthenticationCookie(ctx, token);
         return { id };
       } catch (error) {
         if (error instanceof TRPCError) throw error;

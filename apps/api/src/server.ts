@@ -1,5 +1,6 @@
 import { apiReference } from "@scalar/express-api-reference";
 import * as trpcExpress from "@trpc/server/adapters/express";
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
 import { createOpenApiExpressMiddleware, generateOpenApiDocument } from "trpc-to-openapi";
@@ -26,6 +27,7 @@ app.use(
 // }
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/", (req, res) => {
   return res.json({ message: "API is up and running..." });
