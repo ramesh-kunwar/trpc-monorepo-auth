@@ -4,11 +4,13 @@ import { signInUserWithEmailAndPasswordInput } from "@repo/services/user/model";
 
 import { userService } from "../../services/index";
 import { publicProcedure, router } from "../../trpc";
-import { setAuthenticationCookie } from "../../utils/cookie";
+import { getAuthenticationCookie, setAuthenticationCookie } from "../../utils/cookie";
 import { generatePath } from "../../utils/path-generator";
 import {
   createUserWithEmailAndPasswordInputModel,
   createUserWithEmailAndPasswordOutputModel,
+  getLoggedInUserInfoInputModel,
+  getLoggedInUserInfoOutputModel,
   signInUserWithEmailAndPasswordInputModel,
   signInUserWithEmailAndPasswordOutputModel,
 } from "./model";
@@ -67,5 +69,30 @@ export const authRouter = router({
         if (error instanceof TRPCError) throw error;
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Login failed" });
       }
+    }),
+
+  getLoggedInUserInfo: publicProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: getPath("/getLoggedInUserInfo"),
+        tags: TAGS,
+      },
+    })
+    .input(getLoggedInUserInfoInputModel)
+    .output(getLoggedInUserInfoOutputModel)
+    .query(async ({ ctx }) => {
+      const userToken = getAuthenticationCookie(ctx);
+      if (!userToken)
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "User is not logged in" });
+
+      const { id, email, fullName, profileImageUrl } =
+        await userService.verifyAndDecodeUserToken(userToken);
+      return {
+        id,
+        email,
+        fullName,
+        profileImageUrl,
+      };
     }),
 });

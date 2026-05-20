@@ -29,6 +29,32 @@ class UserService {
     return { token };
   }
 
+  private async verifyUserToken(token: string): Promise<GenerateUserTokenPayloadType> {
+    try {
+      const verificationResult = jwt.verify(token, env.JWT_SECRET) as GenerateUserTokenPayloadType;
+      return verificationResult;
+    } catch (error) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "Token invalid or expired" });
+    }
+  }
+
+  private async getUserInfoById(id: string) {
+    const user = await db
+      .select({
+        id: usersTable.id,
+        email: usersTable.email,
+        fullName: usersTable.fullName,
+        profileImageUrl: usersTable.profileImageUrl,
+      })
+      .from(usersTable)
+      .where(eq(usersTable.id, id));
+
+    if (!user || user.length === 0)
+      throw new TRPCError({ code: "NOT_FOUND", message: `User with ${id} doesn't exist` });
+
+    return user[0]!;
+  }
+
   private async generateHash(salt: string, password: string) {
     return createHmac("sha256", salt).update(password).digest("hex");
   }
@@ -83,6 +109,12 @@ class UserService {
       id: existingUser.id,
       token,
     };
+  }
+
+  public async verifyAndDecodeUserToken(token: string) {
+    const { id } = await this.verifyUserToken(token);
+    const userInfo = await this.getUserInfoById(id);
+    return { ...userInfo };
   }
 }
 
