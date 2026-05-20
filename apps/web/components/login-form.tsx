@@ -9,8 +9,8 @@ import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "~/components/ui/field";
 import { Input } from "~/components/ui/input";
+import { useSignIn } from "~/hooks/api/auth";
 import { cn } from "~/lib/utils";
-import { trpc } from "~/trpc/client";
 
 const loginSchema = z.object({
   email: z.email("Invalid email address"),
@@ -20,7 +20,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
-  const { mutateAsync: signInAsync } = trpc.auth.signInUserWithEmailAndPasswordInput.useMutation();
+  const { signInUserWithEmailAndPasswordAsync } = useSignIn();
 
   const {
     register,
@@ -32,7 +32,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
 
   async function onSubmit(values: LoginFormValues) {
     try {
-      await signInAsync({ email: values.email, password: values.password });
+      await signInUserWithEmailAndPasswordAsync({ email: values.email, password: values.password });
       toast.success("Signed in", {
         description: "Welcome back!",
       });
