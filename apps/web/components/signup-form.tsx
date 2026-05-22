@@ -2,6 +2,8 @@
 
 import { useForm } from "react-hook-form";
 
+import { useRouter } from "next/navigation";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -27,6 +29,7 @@ const signupSchema = z
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 export function SignupForm({ className, ...props }: React.ComponentProps<"form">) {
+  const router = useRouter();
   const { createUserWithEmailAndPasswordAsync } = useSignup();
   const {
     register,
@@ -46,6 +49,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
       toast.success("Account created", {
         description: "Welcome! You can now sign in.",
       });
+      router.replace("/dashboard");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Something went wrong.";
       toast.error("Signup failed", { description: message });
